@@ -84,7 +84,7 @@ impl SigId26 {
         raw
     }
 
-    /// Extract timestamp (48 bits)
+    /// Extract timestamp (48 bits) - returns milliseconds since EPOCH (2020)
     pub fn timestamp(&self) -> u64 {
         let raw = self.as_raw_bytes();
         ((raw[0] as u64) << 40)
@@ -97,6 +97,8 @@ impl SigId26 {
 
     /// Extract timestamp in milliseconds since UNIX_EPOCH (1970)
     pub fn timestamp_ms(&self) -> u64 {
+        // timestamp() возвращает относительное время (от EPOCH)
+        // Прибавляем EPOCH для получения абсолютного времени
         self.timestamp() + EPOCH
     }
 

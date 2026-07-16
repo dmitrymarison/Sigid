@@ -17,12 +17,20 @@
 #![no_std]
 #![warn(missing_docs, missing_debug_implementations)]
 
+extern crate alloc;
+
 mod id;
 mod generator;
 mod encoder;
 mod decoder;
 mod checksum;
 mod consts;
+
+#[cfg(feature = "serde")]
+mod serde;
+
+#[cfg(feature = "uuid")]
+mod uuid_conv;
 
 pub use id::SigId26;
 pub use generator::Generator;

@@ -2,7 +2,7 @@
 
 //! ID generator
 
-use crate::{SigId26, COUNTER_MAX};
+use crate::{SigId26, EPOCH, COUNTER_MAX};
 
 /// ID generator as a pure state machine
 #[derive(Debug, Clone)]
@@ -30,8 +30,8 @@ impl Generator {
 
     /// Generate ID from timestamp (milliseconds since UNIX_EPOCH)
     pub fn generate(&mut self, ms: u64) -> SigId26 {
-        // Используем ms напрямую (48 бит)
-        let timestamp = ms & 0xFFFFFFFFFFFF;
+        // Вычитаем EPOCH, чтобы хранить относительное время
+        let timestamp = ms.saturating_sub(EPOCH);
         
         // Update counter
         if ms == self.last_ms {

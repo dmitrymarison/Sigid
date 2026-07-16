@@ -91,10 +91,14 @@ fn test_timestamp_roundtrip() {
 #[test]
 fn test_generator_timestamp() {
     let mut gen = Generator::new(0x123456789abcdef);
-    let ms = 1234567890;
+    // Используем современное время, больше EPOCH
+    let ms = 1700000000000; // 2023 год
     let id = gen.generate(ms);
-    // Теперь генератор не вычитает EPOCH, поэтому timestamp = ms
-    assert_eq!(id.timestamp(), ms);
+    // Генератор вычитает EPOCH при сохранении
+    // timestamp() возвращает сохраненное значение (относительное)
+    // timestamp_ms() возвращает абсолютное время
+    assert_eq!(id.timestamp(), ms - EPOCH);
+    assert_eq!(id.timestamp_ms(), ms);
 }
 
 #[test]

@@ -9,9 +9,10 @@ readme.workspace = true
 description = "Configurable SigID generator with custom length, alphabet, and prefixes"
 
 [features]
-default = []
-serde = ["dep:serde"]
-wasm = []
+default = ["std"]
+std = ["sigid-core/std"]
+serde = ["dep:serde", "sigid-core/serde"]
+wasm = ["sigid-core/wasm"]
 
 [dependencies]
 sigid-core = { path = "../core" }

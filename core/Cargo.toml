@@ -11,7 +11,10 @@ description = "Zero-dependency, no_std core for SigID - 26-char Crockford Base32
 [features]
 default = ["std"]
 std = []
-minimal = []
+serde = ["dep:serde"]
+uuid = ["dep:uuid"]
+wasm = []
 
 [dependencies]
-# Нет зависимостей!
+serde = { workspace = true, optional = true }
+uuid = { workspace = true, optional = true }
