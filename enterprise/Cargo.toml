@@ -9,7 +9,7 @@ repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/sigid-enterprise"
 readme.workspace = true
-description = "Enterprise-grade Sigid generator with worker ID, coordination, and UUID compatibility"
+description = "Enterprise-grade SigID generator with worker ID, coordination, and UUID compatibility"
 categories.workspace = true
 keywords.workspace = true
 exclude = ["tests/"]
@@ -24,7 +24,7 @@ secure = ["sigid-core/secure"]
 full = ["uuid", "serde", "secure"]
 
 [dependencies]
-sigid-core = { path = "../core" }
-sigid-flexible = { path = "../flexible" }
+sigid-core = { path = "../core", version = "1.0.0" }
+sigid-flexible = { path = "../flexible", version = "1.0.0" }
 uuid = { workspace = true, optional = true }
 ulid = { version = "1.0", optional = true }
