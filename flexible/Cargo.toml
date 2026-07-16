@@ -1,0 +1,18 @@
+[package]
+name = "sigid-flexible"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+description = "Configurable SigID generator with custom length, alphabet, and prefixes"
+
+[features]
+default = []
+serde = ["dep:serde"]
+wasm = []
+
+[dependencies]
+sigid-core = { path = "../core" }
+serde = { workspace = true, optional = true }

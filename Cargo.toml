@@ -1,0 +1,25 @@
+[workspace]
+members = ["core", "flexible", "enterprise"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Dmitry Marison <dmitrymarison@gmail.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/dmitrymarison/sigid"
+readme = "README.md"
+description = "SigID - Configurable ID generator with three layers: Simple → Flexible → Enterprise"
+keywords = ["id", "generator", "unique", "uuid", "ulid", "snowflake"]
+categories = ["algorithms", "data-structures", "encoding"]
+
+# Зависимости для workspace (без optional!)
+[workspace.dependencies]
+getrandom = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+uuid = "1.0"
+criterion = "0.5"
+
+[profile.release]
+lto = true
+codegen-units = 1

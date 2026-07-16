@@ -1,0 +1,18 @@
+[package]
+name = "sigid-enterprise"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+description = "Enterprise-grade SigID generator with worker ID, coordination, and UUID compatibility"
+
+[features]
+default = []
+uuid = ["dep:uuid"]
+
+[dependencies]
+sigid-core = { path = "../core" }
+sigid-flexible = { path = "../flexible" }
+uuid = { workspace = true, optional = true }

@@ -1,0 +1,17 @@
+[package]
+name = "sigid-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+description = "Zero-dependency, no_std core for SigID - 26-char Crockford Base32 identifiers"
+
+[features]
+default = ["std"]
+std = []
+minimal = []
+
+[dependencies]
+# Нет зависимостей!
