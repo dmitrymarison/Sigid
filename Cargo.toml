@@ -13,7 +13,7 @@ homepage = "https://github.com/dmitrymarison/sigid"
 documentation = "https://docs.rs/sigid-core"
 readme = "README.md"
 description = "Sigid - Configurable ID generator with three layers: Simple → Flexible → Enterprise"
-keywords = ["id", "generator", "unique", "uuid", "ulid", "snowflake"]
+keywords = ["id", "generator", "uuid", "ulid"]
 categories = ["algorithms", "data-structures", "encoding"]
 exclude = [
     ".gitignore",
