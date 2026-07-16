@@ -5,6 +5,7 @@
 [![License: MIT/Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org)
 [![no_std](https://img.shields.io/badge/no__std-compatible-brightgreen.svg)](https://docs.rs/sigid-core)
+[![CI](https://github.com/dmitrymarison/sigid/actions/workflows/ci.yml/badge.svg)](https://github.com/dmitrymarison/sigid/actions/workflows/ci.yml)
 
 > **Sig**il + **ID** — Zero-dependency unique identifiers.
 
@@ -159,7 +160,7 @@ This project is dually licensed under your choice of:
 
 ## Translations
 
-* [Русский](README.md)
+* [Русский](README_RU.md)
 * [Español](README_ES.md)
 * [中文](README_ZH.md)
 
