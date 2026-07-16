@@ -55,33 +55,38 @@ impl fmt::Display for InspectResult {
         writeln!(f, "Timestamp: {} ms", self.timestamp)?;
         #[cfg(feature = "std")]
         writeln!(f, "         {}", self.timestamp_human())?;
-        writeln!(f, "Worker:  {}", self.worker_id.map(|w| w.to_string()).unwrap_or_else(|| "None".to_string()))?;
+        writeln!(
+            f,
+            "Worker:  {}",
+            self.worker_id
+                .map(|w| w.to_string())
+                .unwrap_or_else(|| "None".to_string())
+        )?;
         writeln!(f, "Counter: {}", self.counter)?;
         writeln!(f, "Random:  0x{:016X}", self.random)?;
         if let Some(ch) = self.checksum {
-            writeln!(f, "Checksum: {} {}", ch, if self.checksum_valid { "✅" } else { "❌" })?;
+            writeln!(
+                f,
+                "Checksum: {} {}",
+                ch,
+                if self.checksum_valid { "✅" } else { "❌" }
+            )?;
         }
         Ok(())
     }
 }
 
 /// Inspect an ID and extract all metadata
-/// 
-/// # Important
-/// Uses `timestamp_ms()` which returns absolute UNIX timestamp (with EPOCH added)
-/// Do NOT add EPOCH again in this function!
 pub fn inspect(id: &str) -> Option<InspectResult> {
     // Parse ID
-    let (prefix, body) = if let Some(pos) = id.rfind(|c: char| c == '_' || c == '-' || c == '.') {
+    let (prefix, body) = if let Some(pos) = id.rfind(['_', '-', '.']) {
         (Some(&id[..pos + 1]), &id[pos + 1..])
     } else {
         (None, id)
     };
 
     // Try to parse body as SigId26
-     let parsed = SigId26::from_str(body).ok()?;
-
-     let timestamp = parsed.timestamp_ms();
+    let parsed = SigId26::from_str(body).ok()?;
 
     // Check for checksum
     let (checksum, checksum_valid) = if body.len() > 1 {
@@ -96,6 +101,10 @@ pub fn inspect(id: &str) -> Option<InspectResult> {
     } else {
         (None, true)
     };
+
+    // Используем timestamp_ms() - она уже возвращает абсолютное время с EPOCH
+    // НЕ прибавляем EPOCH повторно!
+    let timestamp = parsed.timestamp_ms();
 
     Some(InspectResult {
         raw: id.to_string(),
@@ -120,42 +129,42 @@ mod tests {
     fn test_inspect() {
         let mut gen = Generator::new(0x123456789abcdef);
         let ms = 1700000000000;
-        let id = gen.generate(ms);
+        let id = gen.generate(ms).unwrap();
         let id_str = id.to_string();
-        
+
         let result = inspect(&id_str).unwrap();
-        // Теперь должно быть правильно
         assert_eq!(result.timestamp, ms);
+        assert_eq!(result.prefix, None);
     }
 
     #[test]
     fn test_inspect_with_timestamp() {
         let timestamp = 1700000000000;
-        // raw_new ожидает относительное время (без EPOCH)
-        let id = SigId26::raw_new(timestamp - EPOCH, 42, 0x123456789abcdef);
+        let id = SigId26::raw_new_with_worker(timestamp - EPOCH, 42, 0, 0x123456789abcdef);
         let id_str = id.to_string();
-        
+
         let result = inspect(&id_str).unwrap();
-        // timestamp_ms() прибавит EPOCH
         assert_eq!(result.timestamp, timestamp);
+        assert_eq!(result.worker_id, Some(42));
     }
 
     #[test]
     fn test_inspect_with_prefix() {
         let timestamp = 1700000000000;
-        let id = SigId26::raw_new(timestamp - EPOCH, 0, 0);
+        let id = SigId26::raw_new_with_worker(timestamp - EPOCH, 0, 0, 0);
         let id_str = format!("user_{}", id);
         let result = inspect(&id_str).unwrap();
         assert_eq!(result.prefix, Some("user_".to_string()));
+        assert!(result.has_prefix);
     }
 
     #[test]
     fn test_inspect_roundtrip() {
         let mut gen = Generator::new(0x123456789abcdef);
         let ms = 1700000000000;
-        let id = gen.generate(ms);
+        let id = gen.generate(ms).unwrap();
         let id_str = id.to_string();
-        
+
         let result = inspect(&id_str).unwrap();
         assert_eq!(result.timestamp, ms);
     }

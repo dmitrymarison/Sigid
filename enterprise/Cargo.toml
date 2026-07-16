@@ -2,11 +2,17 @@
 name = "sigid-enterprise"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/sigid-enterprise"
 readme.workspace = true
-description = "Enterprise-grade SigID generator with worker ID, coordination, and UUID compatibility"
+description = "Enterprise-grade Sigid generator with worker ID, coordination, and UUID compatibility"
+categories.workspace = true
+keywords.workspace = true
+exclude = ["tests/"]
 
 [features]
 default = ["std"]
@@ -14,7 +20,8 @@ std = ["sigid-core/std", "sigid-flexible/std"]
 uuid = ["dep:uuid", "sigid-core/uuid"]
 ulid = ["dep:ulid"]
 serde = ["sigid-flexible/serde", "sigid-core/serde"]
-full = ["uuid", "serde"]
+secure = ["sigid-core/secure"]
+full = ["uuid", "serde", "secure"]
 
 [dependencies]
 sigid-core = { path = "../core" }

@@ -3,15 +3,15 @@
 //! Serde support for SigId26
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize, Serializer, Deserializer};
-#[cfg(feature = "serde")]
 use crate::SigId26;
-#[cfg(feature = "serde")]
-use core::str::FromStr;
 #[cfg(feature = "serde")]
 use alloc::string::String;
 #[cfg(feature = "serde")]
 use alloc::string::ToString;
+#[cfg(feature = "serde")]
+use core::str::FromStr;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[cfg(feature = "serde")]
 impl Serialize for SigId26 {

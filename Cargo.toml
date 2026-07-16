@@ -5,13 +5,22 @@ resolver = "2"
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.70"
 authors = ["Dmitry Marison <dmitrymarison@gmail.com>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/dmitrymarison/sigid"
+homepage = "https://github.com/dmitrymarison/sigid"
+documentation = "https://docs.rs/sigid-core"
 readme = "README.md"
-description = "SigID - Configurable ID generator with three layers: Simple → Flexible → Enterprise"
+description = "Sigid - Configurable ID generator with three layers: Simple → Flexible → Enterprise"
 keywords = ["id", "generator", "unique", "uuid", "ulid", "snowflake"]
 categories = ["algorithms", "data-structures", "encoding"]
+exclude = [
+    ".gitignore",
+    ".github/",
+    "benches/",
+    "examples/",
+]
 
 [workspace.dependencies]
 getrandom = "0.2"

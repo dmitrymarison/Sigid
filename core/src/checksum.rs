@@ -22,12 +22,16 @@ pub fn crc16(data: &[u8]) -> u16 {
 pub fn iso7064_checksum(data: &[u8]) -> u8 {
     let mut sum: u16 = 0;
     for &byte in data {
-        let val = if byte >= 10 { (byte - 10 + 36) as u16 } else { byte as u16 };
+        let val = if byte >= 10 {
+            (byte - 10 + 36) as u16
+        } else {
+            byte as u16
+        };
         sum = (sum + val) % 37;
         sum = (sum * 36) % 37;
     }
     sum = (sum * 36) % 37;
-    
+
     if sum < 10 {
         sum as u8 + b'0'
     } else {

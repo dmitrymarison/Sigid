@@ -12,28 +12,28 @@
 //! ```
 //! use sigid_flexible::{Generator, Alphabet};
 //!
-//! let gen = Generator::new()
+//! let mut gen = Generator::new()
 //!     .length(24)
-//!     .alphabet(Alphabet::Base64)
+//!     .alphabet(Alphabet::Crockford32)
 //!     .build();
 //!
-//! let id = gen.generate(1234567890);
+//! let id = gen.generate(1234567890).unwrap();
 //! println!("{}", id);
 //! ```
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs, missing_debug_implementations)]
 
-mod generator;
 mod alphabet;
 mod checksum;
+mod generator;
 
-pub use generator::Generator;
 pub use alphabet::Alphabet;
 pub use checksum::{add_checksum, verify_checksum};
+pub use generator::Generator;
 
 /// Re-export core types
-pub use sigid_core::{SigId26, Error, Result, EPOCH, COUNTER_MAX};
+pub use sigid_core::{Error, Result, SigId26, COUNTER_MAX, EPOCH};
 
 #[cfg(feature = "std")]
 pub mod prefix {

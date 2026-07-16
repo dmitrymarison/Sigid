@@ -1,30 +1,33 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 //! # SigID Core
-//! 
+//!
 //! Zero-dependency, no_std core for generating 26-character identifiers
 //! in Crockford Base32 format.
 //!
 //! # Example
 //! ```
 //! use sigid_core::{Generator, SigId26};
-//! 
+//!
 //! let mut gen = Generator::new(0x123456789abcdef);
-//! let id = gen.generate(1234567890);
+//! let id = gen.generate(1234567890).unwrap();
 //! println!("{}", id);
 //! ```
 
 #![no_std]
 #![warn(missing_docs, missing_debug_implementations)]
 
+#[cfg(feature = "std")]
+extern crate std;
+
 extern crate alloc;
 
-mod id;
-mod generator;
-mod encoder;
-mod decoder;
 mod checksum;
 mod consts;
+mod decoder;
+mod encoder;
+mod generator;
+mod id;
 
 #[cfg(feature = "serde")]
 mod serde;
@@ -32,12 +35,12 @@ mod serde;
 #[cfg(feature = "uuid")]
 mod uuid_conv;
 
-pub use id::SigId26;
-pub use generator::Generator;
-pub use encoder::encode_crockford32;
-pub use decoder::decode_crockford32;
 pub use checksum::{crc16, iso7064_checksum};
 pub use consts::*;
+pub use decoder::decode_crockford32;
+pub use encoder::encode_crockford32;
+pub use generator::Generator;
+pub use id::SigId26;
 
 /// Result type for no_std compatibility
 pub type Result<T> = core::result::Result<T, Error>;
@@ -53,7 +56,7 @@ pub enum Error {
     ChecksumMismatch,
     /// Timestamp overflow (max 2^48)
     TimestampOverflow,
-    /// Counter overflow (max 65535)
+    /// Counter overflow (max 16383)
     CounterOverflow,
 }
 
@@ -64,7 +67,7 @@ impl core::fmt::Display for Error {
             Self::InvalidCharacter => write!(f, "Invalid character in ID"),
             Self::ChecksumMismatch => write!(f, "Checksum verification failed"),
             Self::TimestampOverflow => write!(f, "Timestamp overflow (max 2^48)"),
-            Self::CounterOverflow => write!(f, "Counter overflow (max 65535)"),
+            Self::CounterOverflow => write!(f, "Counter overflow (max 16383)"),
         }
     }
 }

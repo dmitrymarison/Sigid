@@ -2,11 +2,17 @@
 name = "sigid-core"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/sigid-core"
 readme.workspace = true
-description = "Zero-dependency, no_std core for SigID - 26-char Crockford Base32 identifiers"
+description = "Zero-dependency, no_std core for Sigid - 26-char Crockford Base32 identifiers"
+categories.workspace = true
+keywords.workspace = true
+exclude = ["tests/", "benches/"]
 
 [features]
 default = ["std"]
@@ -14,7 +20,11 @@ std = []
 serde = ["dep:serde"]
 uuid = ["dep:uuid"]
 wasm = []
+secure = ["dep:getrandom", "std"]
+wyrand = ["dep:wyrand"]
 
 [dependencies]
 serde = { workspace = true, optional = true }
 uuid = { workspace = true, optional = true }
+getrandom = { version = "0.2", optional = true }
+wyrand = { version = "0.4", optional = true }

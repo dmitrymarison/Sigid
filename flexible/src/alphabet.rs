@@ -3,9 +3,10 @@
 //! Alphabet configuration
 
 /// Supported alphabets for ID generation
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Alphabet {
     /// Crockford Base32 (default) - 0-9 A-Z without I,L,O,U
+    #[default]
     Crockford32,
     /// Base64 URL-safe - A-Z a-z 0-9 -_
     Base64,
@@ -59,12 +60,6 @@ impl Alphabet {
     }
 }
 
-impl Default for Alphabet {
-    fn default() -> Self {
-        Self::Crockford32
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -86,5 +81,11 @@ mod tests {
         assert!(!alpha.contains('L')); // L excluded
         assert!(!alpha.contains('O')); // O excluded
         assert!(!alpha.contains('U')); // U excluded
+    }
+
+    #[test]
+    fn test_default() {
+        let alpha = Alphabet::default();
+        assert!(matches!(alpha, Alphabet::Crockford32));
     }
 }

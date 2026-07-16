@@ -2,7 +2,7 @@
 
 //! Checksum utilities for flexible generator
 
-pub use sigid_core::{iso7064_checksum};
+pub use sigid_core::iso7064_checksum;
 
 /// Add checksum to ID (alloc version for no_std)
 #[cfg(feature = "std")]

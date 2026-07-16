@@ -1,28 +1,38 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 //! Worker ID management for distributed systems
+//!
+//! # Note
+//! Worker ID is 16-bit (0-65535) for Enterprise schema.
+//! This allows up to 65,536 unique workers in a cluster.
 
 use core::fmt;
 
-/// 10-bit Worker ID (0-1023)
+/// 16-bit Worker ID (0-65535)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct WorkerId(u16);
 
 impl WorkerId {
-    /// Maximum worker ID value (10 bits)
-    pub const MAX: u16 = 0x3FF;
+    /// Maximum worker ID value (16 bits)
+    pub const MAX: u16 = 0xFFFF;
 
     /// Create new worker ID with validation
     pub fn new(id: u16) -> Option<Self> {
-        if id <= Self::MAX {
-            Some(Self(id))
-        } else {
-            None
-        }
+        Some(Self(id & Self::MAX))
     }
 
     /// Create worker ID without validation (use with caution)
+    ///
+    /// # Safety
+    /// This function does not validate that `id` is within the valid range (0-65535).
+    /// The caller must ensure that `id` is <= `WorkerId::MAX`.
+    /// Using an invalid value may cause unexpected behavior in downstream systems.
     pub const unsafe fn new_unchecked(id: u16) -> Self {
+        Self(id & Self::MAX)
+    }
+
+    /// Create worker ID from u16 (with mask)
+    pub const fn from_u16(id: u16) -> Self {
         Self(id & Self::MAX)
     }
 
@@ -43,11 +53,9 @@ impl WorkerId {
             }
         }
 
-        // Try POD_NUM (Kubernetes)
-        if let Ok(val) = env::var("POD_NUM") {
-            if let Ok(id) = val.parse::<u16>() {
-                return Self::new(id);
-            }
+        // Try POD_NAME (Kubernetes) - более стандартно чем POD_NUM
+        if let Ok(pod) = env::var("POD_NAME") {
+            return Self::from_hostname(&pod);
         }
 
         // Try HOSTNAME hash
@@ -67,7 +75,7 @@ impl WorkerId {
         let mut hasher = DefaultHasher::new();
         hostname.hash(&mut hasher);
         let hash = hasher.finish();
-        Self::new((hash & 0x3FF) as u16)
+        Self::new((hash & 0xFFFF) as u16)
     }
 
     /// Generate worker ID from MAC address (deterministic)
@@ -82,21 +90,19 @@ impl WorkerId {
     /// Zero-config worker ID (tries env, then hostname, then random)
     #[cfg(feature = "std")]
     pub fn zero_config() -> Self {
-        Self::from_env()
-            .or_else(Self::from_mac)
-            .unwrap_or_else(|| {
-                // Last resort: use random
-                use std::collections::hash_map::RandomState;
-                use std::hash::{BuildHasher, Hasher};
-                let hash = RandomState::new().build_hasher().finish();
-                unsafe { Self::new_unchecked((hash & 0x3FF) as u16) }
-            })
+        Self::from_env().or_else(Self::from_mac).unwrap_or_else(|| {
+            // Last resort: use random
+            use std::collections::hash_map::RandomState;
+            use std::hash::{BuildHasher, Hasher};
+            let hash = RandomState::new().build_hasher().finish();
+            unsafe { Self::new_unchecked((hash & 0xFFFF) as u16) }
+        })
     }
 
     /// Generate worker ID for no_std environments
     #[cfg(not(feature = "std"))]
     pub fn from_seed(seed: u64) -> Self {
-        unsafe { Self::new_unchecked((seed & 0x3FF) as u16) }
+        unsafe { Self::new_unchecked((seed & 0xFFFF) as u16) }
     }
 }
 
@@ -124,16 +130,29 @@ mod tests {
 
     #[test]
     fn test_worker_id_bounds() {
-        assert!(WorkerId::new(0).is_some());
-        assert!(WorkerId::new(1023).is_some());
-        assert!(WorkerId::new(1024).is_none());
-        assert!(WorkerId::new(u16::MAX).is_none());
+        assert_eq!(WorkerId::new(0).unwrap().value(), 0);
+        assert_eq!(WorkerId::new(65535).unwrap().value(), 65535);
+
+        let id = WorkerId::new(65535).unwrap();
+        assert_eq!(id.value(), 65535);
+
+        let id = WorkerId::from_u16(0xFFFF);
+        assert_eq!(id.value(), 0xFFFF);
     }
 
     #[test]
     fn test_worker_id_from_u16() {
-        let id = WorkerId::from(123);
-        assert_eq!(id.value(), 123);
+        let id = WorkerId::from(12345);
+        assert_eq!(id.value(), 12345);
+    }
+
+    #[test]
+    fn test_worker_id_from_u16_const() {
+        let id = WorkerId::from_u16(0xFFFF);
+        assert_eq!(id.value(), 0xFFFF);
+
+        let id = WorkerId::from_u16(0xFFFF);
+        assert_eq!(id.value(), 0xFFFF);
     }
 
     #[test]
@@ -141,12 +160,18 @@ mod tests {
     fn test_worker_id_from_hostname() {
         let id = WorkerId::from_hostname("test-host-1");
         assert!(id.is_some());
-        assert!(id.unwrap().value() <= 1023);
     }
 
     #[test]
     fn test_worker_id_value() {
         let id = WorkerId::new(42).unwrap();
         assert_eq!(id.value(), 42);
+    }
+
+    #[test]
+    #[cfg(feature = "std")]
+    fn test_worker_id_zero_config() {
+        let _id = WorkerId::zero_config();
+        // u16 всегда <= 65535, проверка не нужна
     }
 }
