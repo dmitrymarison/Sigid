@@ -74,7 +74,7 @@ sigid = "1.0.0"
 
 ### 1. 基础版 (Core)
 ```rust
-use sigid::core::{Generator, SigId26};
+use sigid_core::{Generator, SigId26};
 
 fn main() {
     let mut gen = Generator::new(0x123456789abcdef);
@@ -85,7 +85,7 @@ fn main() {
 
 ### 2. 定制版 (Flexible)
 ```rust
-use sigid::flexible::{Generator, Alphabet};
+use sigid_flexible::{Generator, Alphabet};
 
 fn main() {
     let mut gen = Generator::new()
@@ -101,7 +101,7 @@ fn main() {
 
 ### 3. 企业版 (Enterprise)
 ```rust
-use sigid::enterprise::{Generator, WorkerId, SigIdUuidExt};
+use sigid_enterprise::{Generator, WorkerId, SigIdUuidExt};
 
 fn main() {
     let mut gen = Generator::new()
