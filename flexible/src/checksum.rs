@@ -2,6 +2,8 @@
 
 //! Checksum utilities for flexible generator
 
+use alloc::format;
+
 pub use sigid_core::iso7064_checksum;
 
 /// Add checksum to ID (alloc version for no_std)
@@ -14,7 +16,6 @@ pub fn add_checksum(id: &str) -> String {
 /// Add checksum to ID (no_std version)
 #[cfg(not(feature = "std"))]
 pub fn add_checksum(id: &str) -> alloc::string::String {
-    use alloc::string::String;
     let checksum = iso7064_checksum(id.as_bytes());
     format!("{}{}", id, checksum as char)
 }

@@ -17,6 +17,34 @@ use crate::{
 use core::fmt;
 use core::str::FromStr;
 
+/// Ошибки, возникающие при парсинге строки в SigId26.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ParseError {
+    /// Строка должна содержать ровно 26 символов.
+    Length(usize),
+    /// Символ не соответствует алфавиту Crockford Base32.
+    Character(char, usize),
+    /// Контрольная сумма не совпадает (опционально).
+    Checksum,
+}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Length(len) => {
+                write!(f, "invalid length: expected 26 characters, got {}", len)
+            }
+            Self::Character(ch, pos) => {
+                write!(f, "invalid character: '{}' at position {}", ch, pos)
+            }
+            Self::Checksum => write!(f, "invalid checksum"),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for ParseError {}
+
 /// 26-character identifier in Crockford Base32 format
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct SigId26 {
@@ -128,6 +156,56 @@ impl SigId26 {
         Self::from_raw_bytes(raw)
     }
 
+    /// Парсит строку в формате Crockford Base32 обратно в SigId26.
+    ///
+    /// # Примеры
+    ///
+    /// ```
+    /// use sigid_core::SigId26;
+    ///
+    /// let id = SigId26::raw_new(1234567890, 42, 0x123456789abcd);
+    /// let id_str = id.to_string();
+    /// let parsed_id = SigId26::from_string(&id_str).unwrap();
+    /// assert_eq!(id, parsed_id);
+    /// ```
+    pub fn from_string(s: &str) -> Result<Self, ParseError> {
+        if s.len() != ID_LENGTH {
+            return Err(ParseError::Length(s.len()));
+        }
+
+        for (i, ch) in s.chars().enumerate() {
+            let byte = ch as u8;
+            let mut found = false;
+
+            for &alphabet_byte in ALPHABET {
+                if alphabet_byte == byte {
+                    found = true;
+                    break;
+                }
+            }
+
+            if !found && ch.is_ascii_lowercase() {
+                let upper_byte = ch.to_ascii_uppercase() as u8;
+                for &alphabet_byte in ALPHABET {
+                    if alphabet_byte == upper_byte {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if !found {
+                return Err(ParseError::Character(ch, i));
+            }
+        }
+
+        let mut raw_bytes = [0u8; 16];
+        match decode_crockford32(s.as_bytes(), &mut raw_bytes) {
+            Ok(()) => Ok(Self::from_raw_bytes(raw_bytes)),
+            Err(_) => Err(ParseError::Length(s.len())),
+        }
+    }
+
     /// Get raw bytes
     pub const fn as_bytes(&self) -> &[u8; ID_LENGTH] {
         &self.bytes
@@ -224,22 +302,10 @@ impl fmt::Debug for SigId26 {
 }
 
 impl FromStr for SigId26 {
-    type Err = Error;
+    type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let cleaned = s.trim();
-
-        if cleaned.len() != ID_LENGTH {
-            return Err(Error::InvalidLength);
-        }
-
-        let mut raw = [0u8; 16];
-        decode_crockford32(cleaned.as_bytes(), &mut raw)?;
-
-        let mut encoded = [0u8; 26];
-        encode_crockford32(&raw, &mut encoded);
-
-        Ok(Self { bytes: encoded })
+        Self::from_string(s)
     }
 }
 
@@ -316,6 +382,53 @@ mod tests {
     }
 
     #[test]
+    fn test_from_string_roundtrip() {
+        let original = SigId26::raw_new(1234567890, 42, 0x123456789abcd);
+        let id_str = original.to_string();
+        let parsed = SigId26::from_string(&id_str).unwrap();
+
+        assert_eq!(original, parsed);
+        assert_eq!(original.as_bytes(), parsed.as_bytes());
+    }
+
+    #[test]
+    fn test_from_string_invalid_length() {
+        let short = "123";
+        let long = "123456789012345678901234567890";
+
+        assert!(matches!(
+            SigId26::from_string(short),
+            Err(ParseError::Length(3))
+        ));
+        assert!(matches!(
+            SigId26::from_string(long),
+            Err(ParseError::Length(30))
+        ));
+    }
+
+    #[test]
+    fn test_from_string_invalid_character() {
+        // Создаём валидную строку из 26 символов
+        let valid = "0123456789ABCDEFGHJKMNPQRS";
+        assert_eq!(valid.len(), 26);
+
+        // Заменяем последний символ на '@'
+        let mut bytes = valid.as_bytes().to_vec();
+        bytes[25] = b'@';
+        let s = core::str::from_utf8(&bytes).unwrap();
+
+        let result = SigId26::from_string(s);
+
+        match result {
+            Err(ParseError::Character(ch, pos)) => {
+                assert_eq!(ch, '@');
+                assert_eq!(pos, 25);
+            }
+            _ => panic!("Expected Character error, got {:?}", result),
+        }
+    }
+
+    #[test]
     fn test_enterprise_roundtrip() {
         let ts = 1234567890;
         let worker = 0x1234;
@@ -359,9 +472,7 @@ mod tests {
 
     #[test]
     fn test_simple_vs_enterprise_consistency() {
-        // Simple версия (worker_id = 0)
         let simple = SigId26::raw_new(1234567890, 42, 0x123456789abcd);
-        // Enterprise версия с worker_id = 0
         let enterprise = SigId26::raw_new_with_worker(1234567890, 0, 42, 0x123456789abcd);
 
         assert_eq!(

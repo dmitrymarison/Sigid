@@ -24,6 +24,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs, missing_debug_implementations)]
 
+extern crate alloc;
+
 mod alphabet;
 mod checksum;
 mod generator;

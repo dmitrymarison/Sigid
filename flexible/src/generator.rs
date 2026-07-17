@@ -2,6 +2,10 @@
 
 //! Flexible ID generator
 
+use alloc::format;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+
 use crate::Alphabet;
 use sigid_core::{Error, Generator as CoreGenerator, SigId26};
 
@@ -84,7 +88,6 @@ impl Generator {
     /// Generate ID from timestamp (no_std version)
     #[cfg(not(feature = "std"))]
     pub fn generate(&mut self, ms: u64) -> Result<alloc::string::String, Error> {
-        use alloc::string::String;
         let id = self.core.generate(ms)?;
         self.format_id(&id)
     }

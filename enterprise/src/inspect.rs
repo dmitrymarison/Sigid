@@ -86,7 +86,10 @@ pub fn inspect(id: &str) -> Option<InspectResult> {
     };
 
     // Try to parse body as SigId26
-    let parsed = SigId26::from_str(body).ok()?;
+    let parsed = match SigId26::from_str(body) {
+        Ok(id) => id,
+        Err(_) => return None,
+    };
 
     // Check for checksum
     let (checksum, checksum_valid) = if body.len() > 1 {
