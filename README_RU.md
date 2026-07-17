@@ -76,7 +76,7 @@ sigid/
 
 ### 1. Простой (Core)
 ```rust
-use sigid::core::{Generator, SigId26};
+use sigid_core::{Generator, SigId26};
 
 fn main() {
     let mut gen = Generator::new(0x123456789abcdef);
@@ -87,7 +87,7 @@ fn main() {
 
 ### 2. Гибкий (Flexible)
 ```rust
-use sigid::flexible::{Generator, Alphabet};
+use sigid_flexible::{Generator, Alphabet};
 
 fn main() {
     let mut gen = Generator::new()
@@ -103,7 +103,7 @@ fn main() {
 
 ### 3. Промышленный (Enterprise)
 ```rust
-use sigid::enterprise::{Generator, WorkerId, SigIdUuidExt};
+use sigid_enterprise::{Generator, WorkerId, SigIdUuidExt};
 
 fn main() {
     let mut gen = Generator::new()
