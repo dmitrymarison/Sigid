@@ -134,7 +134,7 @@ mod tests {
     #[test]
     fn test_decode_lenient() {
         // Проверяем опечатки - создаем строку из одного символа повторенного 26 раз
-        let test_chars = [b'O', b'I', b'L', b'B'];
+        let test_chars = *b"OILB";
 
         for &c in &test_chars {
             let input = [c; 26];
